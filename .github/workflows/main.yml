@@ -1,0 +1,39 @@
+name: CI - Check & Deploy Portfolio
+
+on:
+  push:
+    branches: ["main"]   # ملي تدير push لـ main
+  workflow_dispatch:      # تقدر تشغلو من Actions بيدك
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) جبد الكود ديال repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2) تأكد غير أن index.html موجود (check بسيط)
+      - name: Check index.html exists
+        run: |
+          if [ ! -f "index.html" ]; then
+            echo "index.html is missing!"
+            exit 1
+          fi
+          echo "index.html found ✅"
+
+      # 3) Cache صغير للـ Pages (اختياري)
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 4) رفع الملفات ديال الموقع كـ artifact
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .   # كامل repo (حيت static)
+
+      # 5) Deploy لـ GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
